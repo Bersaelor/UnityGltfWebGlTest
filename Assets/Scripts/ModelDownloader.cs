@@ -54,9 +54,8 @@ public class ModelDownloader : MonoBehaviour
     private async void loadGLTF(string filePath) {
         Debug.Log("[ModelDownloader]: Loading file from path: " + filePath);
         try {
-            // var fileProvider = new LocalFileProvider();
-            
-            var success = await gltfAsset.Load(filePath); // fileProvider )
+            var fileProvider = new LocalFileProvider();
+            var success = await gltfAsset.Load(filePath, fileProvider);
             if (!success) {
                 Debug.LogWarning("[ModelDownloader]: failed to load model: ");
             }

@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.atteneder.gltfast": {
-      "version": "file:/Users/konrad/Source/glTFast",
+      "version": "file:../../glTFast",
       "depth": 0,
       "source": "local",
       "dependencies": {
