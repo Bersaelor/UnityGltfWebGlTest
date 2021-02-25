@@ -12,11 +12,11 @@ public class ModelDownloader : MonoBehaviour
     [Tooltip("URL to load the glTF from.")]
     public string url;
 
-    private GltfAsset gltfAsset;
+    // private GltfAsset gltfAsset;
 
     void Awake()
     {
-        gltfAsset = gameObject.AddComponent<GltfAsset>();
+        // gltfAsset = gameObject.AddComponent<GltfAsset>();
     }
 
 
@@ -25,7 +25,7 @@ public class ModelDownloader : MonoBehaviour
     {
         string basePath = Application.persistentDataPath; 
         string localFilePath = Path.Combine(basePath, Path.GetFileName(url));
-        StartCoroutine(DownloadFile(url, localFilePath, path => loadGLTF(path)));
+        StartCoroutine(DownloadFile(url, data => loadGLTF(data)));
     }
 
     // Update is called once per frame
@@ -34,10 +34,9 @@ public class ModelDownloader : MonoBehaviour
         
     }
 
-    public IEnumerator DownloadFile(string url, string toPath, System.Action<string> callback) {
+    public IEnumerator DownloadFile(string url, System.Action<byte[]> callback) {
         using (var www = UnityWebRequest.Get(url)) {
-            var dh = new DownloadHandlerFile(toPath);
-            dh.removeFileOnAbort = true;
+            var dh = new DownloadHandlerBuffer();
             www.downloadHandler = dh;
             Debug.Log("[ModelDownloader] Downloading file from " + url);
             yield return www.SendWebRequest();
@@ -46,16 +45,20 @@ public class ModelDownloader : MonoBehaviour
             } else if (www.responseCode != (long)System.Net.HttpStatusCode.OK) {
                 Debug.Log("[ModelDownloader] Failed downloading " + url + " with status code " + www.responseCode);
             } else {
-                callback(toPath);
+                callback(dh.data);
             }
         }
     }
 
-    private async void loadGLTF(string filePath) {
-        Debug.Log("[ModelDownloader]: Loading file from path: " + filePath);
+    private async void loadGLTF(byte[] data) {
+        Debug.Log("[ModelDownloader]: Loading file bytes of size " + data.Length);
         try {
-            var fileProvider = new LocalFileProvider();
-            var success = await gltfAsset.Load(filePath, fileProvider);
+            // var fileProvider = new LocalFileProvider();
+            var gltf = new GLTFast.GLTFast();
+            var success = await gltf.Load(data);
+
+            gltf.InstantiateGltf(transform);
+
             if (!success) {
                 Debug.LogWarning("[ModelDownloader]: failed to load model: ");
             }
